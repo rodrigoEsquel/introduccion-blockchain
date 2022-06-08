@@ -26,7 +26,13 @@ async function loadBalances() {
 }
 
 async function makePayment() {
-    const sourceAccount = await server.loadAccount(userAKeyPair.publicKey());
+    const permissions = await xBullSDK.connect({
+        canRequestPublicKey: true,
+        canRequestSign: true
+    });
+    const publicKey = await xBullSDK.getPublicKey();
+    const sourceAccount = await server.loadAccount(publicKey);
+    //const sourceAccount = await server.loadAccount(userAKeyPair.publicKey());
 
     // el SOURCE ACCOUNT de una transacción es el SOURCE ACCOUNT de cada operación por default
     // cada operación puede tener un source distinto (en el próximo ejemplo lo vemos)
@@ -50,11 +56,11 @@ async function makePayment() {
         .build();
 
     console.log(tx.toXDR());
-
+    const signedTransaction = await xBullSDK.signXDR(tx.toXDR());
     tx.sign(userAKeyPair);
 
     try {
-        const txResult = await server.submitTransaction(tx);
+        const txResult = await server.submitTransaction(signedTransaction);
         console.log(txResult);
         loadBalances();
     } catch (e) {
