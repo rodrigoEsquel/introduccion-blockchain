@@ -11,6 +11,7 @@ const userAKeyPair = Keypair.fromSecret("SCFYENBUNWJOBSETNTJBYU2DCT4Q5N4W5BM4CHQ
 const userBKeyPair = Keypair.fromSecret("SBUIWFQYVUYDUWVV2XQSDATXHIID3EYB6S4ULZGORKQJNRXPQAGAP5KC");
 
 
+
 async function loadBalances() {
     // Prestar atención a lo que pasa en el network tab
     const accountA = await server.loadAccount(userAKeyPair.publicKey());
@@ -34,7 +35,6 @@ async function makePayment() {
     // Si hay 2 transacciones de la misma cuenta con el mismo SEQUENCE NUMBER, sólo 1 puede ser enviada y la otra es considerada inválida.
     // También, quien construye la transacción, paga los fees de la red.
     console.log(sourceAccount.sequenceNumber());
-
     // Una transacción puede tener hasta 100 operaciones dentro. Cada operación paga un fee.
     const tx = new TransactionBuilder(sourceAccount, {
         // con esto obtenemos los fees de la red. Si la red está congestionada y no enviamos suficientes fees, entonces nuestra transacción puede fallar.
@@ -42,7 +42,7 @@ async function makePayment() {
         fee: await server.fetchBaseFee(),
         networkPassphrase: "Test SDF Network ; September 2015",
     }).addOperation(Operation.payment({
-        amount: "1",
+        amount: document.querySelector('#amount').value,
         asset: Asset.native(),
         destination: userBKeyPair.publicKey()
     }))
