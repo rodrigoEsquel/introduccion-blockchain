@@ -31,7 +31,7 @@ async function loadBalances() {
 
 }
 
-async function makePayment() {
+async function makePaymentWithW() {
  
     const publicKey = await xBullSDK.getPublicKey();
     const sourceAccount = await server.loadAccount(publicKey);
@@ -58,10 +58,38 @@ async function makePayment() {
         .setTimeout(60 * 10) //10 minutos, luego la tx falla
         .build();
 
-    console.log(tx.toXDR());
+    console.log('tx con W:',tx.toXDR());
     const signedTransaction = await xBullSDK.signXDR(tx.toXDR());
     //tx.sign(userAKeyPair);
+     console.log('Transaction con W:',signedTransaction);
+    try {
+        const txResult = await server.submitTransaction(signedTransaction);
+        console.log('results:',txResult);
+        loadBalances();
+    } catch (e) {
+        console.error('error:',e);
+    }
+}
 
+async function makePaymentWithA() { 
+ 
+    const sourceAccount = await server.loadAccount(userAKeyPair.publicKey());
+   
+    const tx = new TransactionBuilder(sourceAccount, {
+  
+        fee: await server.fetchBaseFee(),
+        networkPassphrase: "Test SDF Network ; September 2015",
+    }).addOperation(Operation.payment({
+        amount: document.querySelector('#amount').value,
+        asset: Asset.native(),
+        destination: userBKeyPair.publicKey()
+    }))
+        .setTimeout(60 * 10) //10 minutos, luego la tx falla
+        .build();
+
+    console.log('tx con A:',tx.toXDR());
+    tx.sign(userAKeyPair);
+    console.log('Transaction con A:',signedTransaction);
     try {
         const txResult = await server.submitTransaction(signedTransaction);
         console.log('results:',txResult);
@@ -72,4 +100,5 @@ async function makePayment() {
 }
 
 document.querySelector('#load-balances').addEventListener('click', loadBalances);
-document.querySelector('#make-payment').addEventListener('click', makePayment);
+document.querySelector('#make-payment-a').addEventListener('click', makePaymentWithA);
+document.querySelector('#make-payment-w').addEventListener('click', makePaymentWithW);
