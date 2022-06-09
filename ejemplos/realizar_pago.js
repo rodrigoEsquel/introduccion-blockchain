@@ -10,8 +10,6 @@ const userAKeyPair = Keypair.fromSecret("SCFYENBUNWJOBSETNTJBYU2DCT4Q5N4W5BM4CHQ
 // GBWARZDWJB6V7LYPNBE5BGY2PFVPSRM2GPKKHT5KZDS4VMWF6MUUMP4D
 const userBKeyPair = Keypair.fromSecret("SBUIWFQYVUYDUWVV2XQSDATXHIID3EYB6S4ULZGORKQJNRXPQAGAP5KC");
 
-
-
 async function loadBalances() {
     // Prestar atención a lo que pasa en el network tab
     const accountA = await server.loadAccount(userAKeyPair.publicKey());
@@ -20,7 +18,6 @@ async function loadBalances() {
     const xlmBalanceA = accountA.balances.filter(balance => balance.asset_type === Asset.native().getAssetType()).pop();
     const xlmBalanceB = accountB.balances.filter(balance => balance.asset_type === Asset.native().getAssetType()).pop();
 
-    console.log(xlmBalanceA, xlmBalanceB);
     document.querySelector('#balance-a').textContent = xlmBalanceA.balance;
     document.querySelector('#balance-b').textContent = xlmBalanceB.balance;
 }
@@ -30,6 +27,9 @@ async function makePayment() {
         canRequestPublicKey: true,
         canRequestSign: true
     });
+
+    console.log('permisions:',permissions);
+
     const publicKey = await xBullSDK.getPublicKey();
     const sourceAccount = await server.loadAccount(publicKey);
     //const sourceAccount = await server.loadAccount(userAKeyPair.publicKey());
@@ -40,7 +40,7 @@ async function makePayment() {
     // el SOURCE ACCOUNT sirve para obtener el SEQUENCE NUMBER, que incrementa de 1 en 1.
     // Si hay 2 transacciones de la misma cuenta con el mismo SEQUENCE NUMBER, sólo 1 puede ser enviada y la otra es considerada inválida.
     // También, quien construye la transacción, paga los fees de la red.
-    console.log(sourceAccount.sequenceNumber());
+    //console.log(sourceAccount.sequenceNumber());
     // Una transacción puede tener hasta 100 operaciones dentro. Cada operación paga un fee.
     const tx = new TransactionBuilder(sourceAccount, {
         // con esto obtenemos los fees de la red. Si la red está congestionada y no enviamos suficientes fees, entonces nuestra transacción puede fallar.
@@ -57,14 +57,14 @@ async function makePayment() {
 
     console.log(tx.toXDR());
     const signedTransaction = await xBullSDK.signXDR(tx.toXDR());
-    tx.sign(userAKeyPair);
+    //tx.sign(userAKeyPair);
 
     try {
         const txResult = await server.submitTransaction(signedTransaction);
-        console.log(txResult);
+        console.log('results:',txResult);
         loadBalances();
     } catch (e) {
-        console.error(e);
+        console.error('error:',e);
     }
 }
 
