@@ -10,26 +10,29 @@ const userAKeyPair = Keypair.fromSecret("SCFYENBUNWJOBSETNTJBYU2DCT4Q5N4W5BM4CHQ
 // GBWARZDWJB6V7LYPNBE5BGY2PFVPSRM2GPKKHT5KZDS4VMWF6MUUMP4D
 const userBKeyPair = Keypair.fromSecret("SBUIWFQYVUYDUWVV2XQSDATXHIID3EYB6S4ULZGORKQJNRXPQAGAP5KC");
 
-async function loadBalances() {
-    // Prestar atención a lo que pasa en el network tab
-    const accountA = await server.loadAccount(userAKeyPair.publicKey());
-    const accountB = await server.loadAccount(userBKeyPair.publicKey());
-
-    const xlmBalanceA = accountA.balances.filter(balance => balance.asset_type === Asset.native().getAssetType()).pop();
-    const xlmBalanceB = accountB.balances.filter(balance => balance.asset_type === Asset.native().getAssetType()).pop();
-
-    document.querySelector('#balance-a').textContent = xlmBalanceA.balance;
-    document.querySelector('#balance-b').textContent = xlmBalanceB.balance;
-}
-
-async function makePayment() {
-    const permissions = await xBullSDK.connect({
+const permissions = await xBullSDK.connect({
         canRequestPublicKey: true,
         canRequestSign: true
     });
 
-    console.log('permisions:',permissions);
+async function loadBalances() {
+    // Prestar atención a lo que pasa en el network tab
+    const accountA = await server.loadAccount(userAKeyPair.publicKey());
+    const accountB = await server.loadAccount(userBKeyPair.publicKey());
+    const accountW = await server.loadAccount(xBullSDK.getPublicKey());
 
+    const xlmBalanceA = accountA.balances.filter(balance => balance.asset_type === Asset.native().getAssetType()).pop();
+    const xlmBalanceB = accountB.balances.filter(balance => balance.asset_type === Asset.native().getAssetType()).pop();
+    const xlmBalanceW = accountW.balances.filter(balance => balance.asset_type === Asset.native().getAssetType()).pop();
+
+    document.querySelector('#balance-a').textContent = xlmBalanceA.balance;
+    document.querySelector('#balance-b').textContent = xlmBalanceB.balance;
+    document.querySelector('#balance-w').textContent = xlmBalanceW.balance;
+
+}
+
+async function makePayment() {
+ 
     const publicKey = await xBullSDK.getPublicKey();
     const sourceAccount = await server.loadAccount(publicKey);
     //const sourceAccount = await server.loadAccount(userAKeyPair.publicKey());
