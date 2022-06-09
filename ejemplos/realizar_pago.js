@@ -1,7 +1,7 @@
 // esto es simplemente para obtener los tipos
 const sdk = /** @type {import("stellar-sdk")} */ (window.StellarSdk);
 
-const { Keypair, Asset, Server, TransactionBuilder, Operation } = sdk;
+const { Keypair, Asset, Server, TransactionBuilder, Operation, Transaction, Network } = sdk;
 const server = new Server('https://horizon-testnet.stellar.org');
 // esto nunca se hace!! es sólo de ejemplo. El frontend siempre crea transacciones SIN firmar.
 // Y luego se las envía a un servidor que tiene las llaves aseguradas para firmar.
@@ -54,11 +54,15 @@ async function makePaymentWithW() {
         .build();
 
     console.log('tx con W:',tx.toXDR());
-    const signedTransaction = await xBullSDK.signXDR(tx.toXDR());
-    console.log('Transaction con W:',signedTransaction);
-
+    const signedXDR = await xBullSDK.signXDR(tx.toXDR());
+    console.log('XDR con W:',signedXDR);
+    const signedTx = new Transaction(signedXDR,Network.TESTNET);
+    console.log('tx firmada con W:',signedTx);
+    
+    
+    
     try {
-        const txResult = await server.submitTransaction(signedTransaction);
+        const txResult = await server.submitTransaction(signedTx);
         console.log('results:',txResult);
         loadBalances();
     } catch (e) {
@@ -72,7 +76,7 @@ async function makePaymentWithA() {
 
     console.log(sourceAccount.sequenceNumber());
 
-  
+  ;
     const tx = new TransactionBuilder(sourceAccount, {
 
         fee: await server.fetchBaseFee(),
@@ -88,7 +92,6 @@ async function makePaymentWithA() {
     console.log('tx con A:',tx.toXDR());
     tx.sign(userAKeyPair);
     console.log('Transaction con A:',tx);
-
 
     try {
         const txResult = await server.submitTransaction(tx);
