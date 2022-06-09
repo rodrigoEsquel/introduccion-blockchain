@@ -85,9 +85,10 @@ async function makePaymentWithA() {
         .setTimeout(60 * 10) //10 minutos, luego la tx falla
         .build();
 
-    console.log(tx.toXDR());
-
+    console.log('tx con A:',tx.toXDR());
     tx.sign(userAKeyPair);
+    console.log('Transaction con A:',tx);
+
 
     try {
         const txResult = await server.submitTransaction(tx);
